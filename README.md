@@ -63,3 +63,7 @@ See also the list of [contributors](https://github.com/sigfox-earthquake/Sigfox_
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Other
+
+used readme template from https://gist.github.com/PurpleBooth/109311bb0361f32d87a2
