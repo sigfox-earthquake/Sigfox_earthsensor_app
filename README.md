@@ -56,7 +56,7 @@ n/a
 
 ## Authors
 
-* **Taylor Yang** - *Initial work* - [PurpleBooth](https://github.com/rdmcolorz)
+* **Taylor Yang** - *Initial work* - [MyGithub](https://github.com/rdmcolorz)
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
