@@ -83,16 +83,16 @@ export default class App extends React.Component {
       style={{ flex: 1 }}
       zoomEnabled={true}
       initialRegion={{
-        latitude: 19.472,
-        longitude: -99.111,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        latitude: 19.203316,
+        longitude: -101.265469,
+        latitudeDelta: 10.1922,
+        longitudeDelta: 10.1421,
       }}
     >
     <MapView.Marker
         coordinate={{
-            latitude: 19.472,
-            longitude: -99.111,
+            latitude: 19.203316,
+            longitude: -101.265469,
         }}
         image={markerMe}
         title={'MyPosition'}
@@ -119,9 +119,9 @@ export default class App extends React.Component {
         image={x.color}
         title={x.key}
         >
-        <View>
-        <Text style={styles.text}>{x.mag}</Text>
-        </View>
+          <View style={styles.circle}>
+            <Text style={styles.text}>{x.mag? x.mag : undefined}</Text>
+          </View>
         </MapView.Marker>
       );
       })}
@@ -141,9 +141,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   text: {
-    fontSize: 15,
-    marginLeft: 20,
-    marginTop: 5,
-    textAlign: 'center',
+    fontSize: 13,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  circle: {
+    flex: 1,
+    marginLeft: 14,
+    marginTop: 8,
   }
 });
