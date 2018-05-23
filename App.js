@@ -97,7 +97,6 @@ export default class App extends React.Component {
         image={markerMe}
         title={'MyPosition'}
         />
-
     { this.state.markerList.map(function(x, i) {
       if (x.mag===0) {
         x.color = markerGreen;
@@ -108,7 +107,6 @@ export default class App extends React.Component {
       else {
         x.color = markerRed;
       }
-      
       return (
         <MapView.Marker
         coordinate={{
