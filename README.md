@@ -23,7 +23,6 @@ git clone this_repo
 brew install npm@4
 brew install watchman
 npm install
-npm install firebase
 ```
 
 ## Running the tests
