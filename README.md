@@ -52,7 +52,7 @@ you can use the expo app to scan and use this app.
 
 ## Built With
 
-n/a
+bootstrapped with create-react-native-app
 
 ## Authors
 
