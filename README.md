@@ -1,7 +1,7 @@
 Will need homebrew for the installation.
 git clone repo
 
-###'brew install npm@4' 
+### 'brew install npm@4' 
 npm version 5 have some bugs so we use v4.
 brew install watchman
 watchman for reloading app when changes are saved, very useful for development
