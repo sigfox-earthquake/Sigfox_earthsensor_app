@@ -58,7 +58,7 @@ n/a
 
 * **Taylor Yang** - *Initial work* - [MyGithub](https://github.com/rdmcolorz)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/sigfox-earthquake/Sigfox_earthsensor_app/contributors) who participated in this project.
 
 ## License
 
