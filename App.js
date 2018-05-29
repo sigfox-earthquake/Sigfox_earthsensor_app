@@ -8,28 +8,17 @@ import markerOrange from "./img/marker_o.png";
 import markerMe from "./img/marker_mypos.png";
 import latLon from "./latlon.js";
 
-initFirebase = async () => {
-  let config = {
-    apiKey: "AIzaSyAW3kLaAOVwMYr0PBd8xgE42LU-IdE4KSw",
-    authDomain: "earthquake-sensors.firebaseapp.com",
-    databaseURL: "https://earthquake-sensors.firebaseio.com",
-    projectId: "earthquake-sensors",
-    storageBucket: "earthquake-sensors.appspot.com",
-    messagingSenderId: "264814667469"
-  };
-  firebase.initializeApp(config);
-}
-
 export default class App extends React.Component {
-
   constructor(props) {
     super(props);
     this.state= {
       database: null,
       markerList: [],
-      latList: [],
-      lngList: [],
-      magList: [],
+      epicenter: [],
+      epicLatLng: {
+        latitude: 0,
+        longitude: 0,
+      },
       curr_cord: {
         latitude: 19.472,
         longitude: -99.111,
@@ -37,9 +26,18 @@ export default class App extends React.Component {
     }
   }
 
-  componentWillMount() {
+  componentWillMount = async () => {
     this.initFirebase();
-    this.initMarkers();
+    await this.initMarkers();
+  }
+//TO DO: have to change it so findEpicenter will update state for epicenter
+  componentWillReceiveProps(nextProps) {
+    console.log('recieved prop');
+    if (nextProps.epicenter.length > 2) {
+      this.findEpicenter(nextProps.epicenter);
+    } else {
+      console.log('less then 3 major')
+    }
   }
 
   initFirebase = async () => {
@@ -57,39 +55,58 @@ export default class App extends React.Component {
   initMarkers = async () => {
     var database = await firebase.database();
     this.setState({ database });
-    if (database) {
+    if (database)
       var markers = await database.ref();
-      var count = 0;
-    }
-    else {
+    else
       console.log('ERROR---no database');
-    }
     markers.on('value', snapshot => {
-      var list =[];
-      snapshot.forEach(function(data){
-          let sen = data.val();
-          sen["key"] = data.key;
-          list.push(sen);
+      var list = [];
+      var alertlist = [];
+      snapshot.forEach(function(data) {
+        let sensor = data.val();
+        sensor["key"] = data.key;
+        list.push(sensor);
+        if (sensor.mag > 3)
+          alertlist.push(sensor)
       })
       this.setState({
-          markerList: list
+          markerList: list,
+          epicenter: alertlist,
       })
-  })  
+    })
+  }
+
+  findEpicenter = (x) => {
+    console.log('got epicenter!');
+    var epicLat = 0;
+    var epicLng = 0;
+    x.forEach(function(data) {
+        epicLat += data.lat;
+        epicLng += data.lng;
+    })
+    console.log(epicLat / 3);
+    console.log(epicLng / 3);
+    this.setState({
+      epicLatLng: {
+        latitude: epicLat / 3,
+        longitude:epicLng / 3
+      }
+    })
   }
 
   render() {
     return (
       <MapView
-      style={{ flex: 1 }}
-      zoomEnabled={true}
-      initialRegion={{
+        style={{ flex: 1 }}
+        zoomEnabled={true}
+        initialRegion={{
         latitude: 19.203316,
         longitude: -101.265469,
-        latitudeDelta: 10.1922,
-        longitudeDelta: 10.1421,
-      }}
-    >
-    <MapView.Marker
+        latitudeDelta: 10,
+        longitudeDelta: 10,
+        }}
+      >
+      <MapView.Marker
         coordinate={{
             latitude: 19.203316,
             longitude: -101.265469,
@@ -97,8 +114,23 @@ export default class App extends React.Component {
         image={markerMe}
         title={'MyPosition'}
         />
+   { this.state.markerList.map(function(x, i) {
+      return (
+        <MapView.Circle
+          key = {i}
+          center={{
+              latitude: x.lat,
+              longitude: x.lng,
+          }}
+          radius = {x.dist * 100}
+          strokeWidth={2}
+          fillColor={'rgba(240,120,0,0.3)'}
+          strokeColor={'rgba(240,120,0,0.3)'}
+        />
+      );
+      })}
     { this.state.markerList.map(function(x, i) {
-      if (x.mag===0) {
+      if (!x.mag) {
         x.color = markerGreen;
       }
       else if (x.mag > 0 && x.mag <= 3) {
@@ -109,7 +141,7 @@ export default class App extends React.Component {
       }
       return (
         <MapView.Marker
-        coordinate={{
+          coordinate={{
             latitude: x.lat,
             longitude: x.lng,
         }}
@@ -120,6 +152,15 @@ export default class App extends React.Component {
           <View style={styles.circle}>
             <Text style={styles.text}>{x.mag? x.mag : undefined}</Text>
           </View>
+          <MapView.Circle
+            center={{
+              latitude: x.lat,
+              longitude: x.lng,
+            }}
+            radius = {x.dist * 10}
+            fillColor={'#0f0'}
+            strokeColor={'#000'}
+          />
         </MapView.Marker>
       );
       })}
