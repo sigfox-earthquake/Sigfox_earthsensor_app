@@ -18,13 +18,13 @@ export default class App extends React.Component {
       database: null,
       markerList: [],
       epicenter: [],
-      epicLatLng: {
+      epicPos: {
         latitude: 0,
         longitude: 0,
       },
-      curr_cord: {
-        latitude: 19.472,
-        longitude: -99.111,
+      currPos: {
+        latitude: 19.203316,
+        longitude: -101.265469,
       }
     }
   }
@@ -68,7 +68,7 @@ export default class App extends React.Component {
       var center = this.findEpicenter(alertlist)
       this.setState({
           markerList: list,
-          epicLatLng: {
+          epicPos: {
             latitude: center.lat,
             longitude: center.lon
           },
@@ -84,7 +84,6 @@ export default class App extends React.Component {
 			B2 = p2.lat - p3.lat,
 			C2 = A2 * p2.lat + B2 * p2.lon,
 			denominator = A1 * B2 - A2 * B1;
-
 		return {
 			lat: (B2 * C1 - B1 * C2) / denominator,
 			lon: (A1 * C2 - A2 * C1) / denominator
@@ -92,25 +91,20 @@ export default class App extends React.Component {
   }
 
   findEpicenter = (x) => {
-    var epicLat = 0;
-    var epicLng = 0;
-    data1 = x[0];
-    data2 = x[1];
-    data3 = x[2];
-    var alert1 = new latLon(data1.lat, data1.lng);
-    var alert2 = new latLon(data2.lat, data2.lng);
-    var alert3 = new latLon(data3.lat, data3.lng);
-
-    var fraction12 = data1.dist / (data1.dist + data2.dist)
-    var fraction23 = data2.dist / (data2.dist + data3.dist)
-
-    var p0 = alert1.intermediatePointTo(alert2, fraction12)
-    var p2 = alert2.intermediatePointTo(alert3, fraction23)
-    var slope12 = -1 / ((data1.lng - data2.lng) / (data1.lat - data2.lat))
-    var slope23 = -1 / ((data2.lng - data3.lng) / (data2.lat - data3.lat))
-    var b12 = p0.lon - (slope12 * p0.lat)
-    var b23 = p2.lon - (slope23 * p2.lat)
-
+    var data1 = x[0],
+        data2 = x[1],
+        data3 = x[2];
+    var alert1 = new latLon(data1.lat, data1.lng),
+        alert2 = new latLon(data2.lat, data2.lng),
+        alert3 = new latLon(data3.lat, data3.lng);
+    var fraction12 = data1.dist / (data1.dist + data2.dist),
+        fraction23 = data2.dist / (data2.dist + data3.dist);
+    var p0 = alert1.intermediatePointTo(alert2, fraction12),
+        p2 = alert2.intermediatePointTo(alert3, fraction23);
+    var slope12 = -1 / ((data1.lng - data2.lng) / (data1.lat - data2.lat)),
+        slope23 = -1 / ((data2.lng - data3.lng) / (data2.lat - data3.lat));
+    var b12 = p0.lon - (slope12 * p0.lat),
+        b23 = p2.lon - (slope23 * p2.lat)
     var p1 = {
           lat: p0.lat + 1,
           lon: (p0.lat + 1) * slope12 + b12
@@ -120,43 +114,35 @@ export default class App extends React.Component {
           lon: (p2.lat + 1) * slope23 + b23
         };
     var latlng = this.lineIntersect(p0, p1, p2, p3);
-    console.log(p1)
     return latlng
   }
   
-
   render() {
     times += 1;
     console.log(times)
-    console.log(this.state.epicLatLng.lat)
+    console.log(this.state.epicPos.lat)
     return (
       <MapView
         style={{ flex: 1 }}
         zoomEnabled={true}
         initialRegion={{
-          latitude: 19.203316,
-          longitude: -101.265469,
+          latitude: this.state.currPos.latitude,
+          longitude: this.state.currPos.longitude,
           latitudeDelta: 10,
           longitudeDelta: 10,
         }}
       >
-      <MapView.Marker
-        coordinate={{
-            latitude: 19.203316,
-            longitude: -101.265469,
-        }}
-        image={markerMe}
-        title={'MyPosition'}
+        <MapView.Marker
+          coordinate={this.state.currPos}
+          image={markerMe}
+          title={'MyPosition'}
         />
-      <MapView.Circle
-        center={{
-            latitude: this.state.epicLatLng.latitude,
-            longitude: this.state.epicLatLng.longitude,
-        }}
-        radius = {20000}
-        title={'Earthquake'}
-        fillColor={'rgba(255,0,0,0.3)'}
-        strokeColor={'rgba(255,0,0,0.3)'}
+        <MapView.Circle
+          center={this.state.epicPos}
+          radius = {20000}
+          title={'Earthquake'}
+          fillColor={'rgba(255,0,0,0.3)'}
+          strokeColor={'rgba(255,0,0,0.3)'}
         />
      
    { this.state.markerList.map(function(x, i) {
@@ -175,26 +161,23 @@ export default class App extends React.Component {
       );
       })}
     { this.state.markerList.map(function(x, i) {
-      if (!x.mag) {
+      if (!x.mag)
         x.color = markerGreen;
-      }
-      else if (x.mag > 0 && x.mag <= 3) {
+      else if (x.mag > 0 && x.mag <= 3)
         x.color = markerOrange;
-      }
-      else {
+      else
         x.color = markerRed;
-      }
       return (
         <MapView.Marker
           coordinate={{
             latitude: x.lat,
             longitude: x.lng,
-        }}
-        key={i}
-        image={x.color}
-        title={x.key}
+          }}
+          key={i}
+          image={x.color}
+          title={x.key}
         >
-          <View style={styles.circle}>
+          <View style={styles.sensorMarker}>
             <Text style={styles.text}>{x.mag? x.mag : undefined}</Text>
           </View>
           <MapView.Circle
@@ -229,7 +212,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center'
   },
-  circle: {
+  sensorMarker: {
     flex: 1,
     marginLeft: 14,
     marginTop: 8,
