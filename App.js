@@ -31,7 +31,6 @@ export default class App extends React.Component {
 
   componentWillMount = async () => {
     this.initFirebase();
-    console.log('init markers')
     this.initMarkers();
   }
 
@@ -50,7 +49,6 @@ export default class App extends React.Component {
 
   initMarkers = async () => {
     var database = await firebase.database();
-    this.setState({ database });
     if (database)
       var markers = await database.ref();
     else
@@ -67,11 +65,12 @@ export default class App extends React.Component {
       })
       var center = this.findEpicenter(alertlist)
       this.setState({
-          markerList: list,
-          epicPos: {
-            latitude: center.lat,
-            longitude: center.lon
-          },
+        database: database,
+        markerList: list,
+        epicPos: {
+          latitude: center.lat,
+          longitude: center.lon
+        },
       })
     })
   }
@@ -120,7 +119,6 @@ export default class App extends React.Component {
   render() {
     times += 1;
     console.log(times)
-    console.log(this.state.epicPos.lat)
     return (
       <MapView
         style={{ flex: 1 }}
