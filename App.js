@@ -6,7 +6,10 @@ import markerGreen from "./img/marker_g.png";
 import markerRed from "./img/marker_r.png";
 import markerOrange from "./img/marker_o.png";
 import markerMe from "./img/marker_mypos.png";
-import latLon from "./latlon.js";
+var latLon = require('geodesy').LatLonVectors;
+import toVector from "./latlon-vectors";
+
+var times = 0;
 
 export default class App extends React.Component {
   constructor(props) {
@@ -28,16 +31,8 @@ export default class App extends React.Component {
 
   componentWillMount = async () => {
     this.initFirebase();
-    await this.initMarkers();
-  }
-//TO DO: have to change it so findEpicenter will update state for epicenter
-  componentWillReceiveProps(nextProps) {
-    console.log('recieved prop');
-    if (nextProps.epicenter.length > 2) {
-      this.findEpicenter(nextProps.epicenter);
-    } else {
-      console.log('less then 3 major')
-    }
+    console.log('init markers')
+    this.initMarkers();
   }
 
   initFirebase = async () => {
@@ -52,6 +47,7 @@ export default class App extends React.Component {
 		firebase.initializeApp(config);
   }
   
+
   initMarkers = async () => {
     var database = await firebase.database();
     this.setState({ database });
@@ -69,41 +65,79 @@ export default class App extends React.Component {
         if (sensor.mag > 3)
           alertlist.push(sensor)
       })
+      var center = this.findEpicenter(alertlist)
       this.setState({
           markerList: list,
-          epicenter: alertlist,
+          epicLatLng: {
+            latitude: center.lat,
+            longitude: center.lon
+          },
       })
     })
   }
 
-  findEpicenter = (x) => {
-    console.log('got epicenter!');
-    var epicLat = 0;
-    var epicLng = 0;
-    x.forEach(function(data) {
-        epicLat += data.lat;
-        epicLng += data.lng;
-    })
-    console.log(epicLat / 3);
-    console.log(epicLng / 3);
-    this.setState({
-      epicLatLng: {
-        latitude: epicLat / 3,
-        longitude:epicLng / 3
-      }
-    })
+  lineIntersect(p0, p1, p2, p3) {
+    var A1 = p1.lon - p0.lon,
+			B1 = p0.lat - p1.lat,
+			C1 = A1 * p0.lat + B1 * p0.lon,
+			A2 = p3.lon - p2.lon,
+			B2 = p2.lat - p3.lat,
+			C2 = A2 * p2.lat + B2 * p2.lon,
+			denominator = A1 * B2 - A2 * B1;
+
+		return {
+			lat: (B2 * C1 - B1 * C2) / denominator,
+			lon: (A1 * C2 - A2 * C1) / denominator
+		}
   }
 
+  findEpicenter = (x) => {
+    var epicLat = 0;
+    var epicLng = 0;
+    data1 = x[0];
+    data2 = x[1];
+    data3 = x[2];
+    var alert1 = new latLon(data1.lat, data1.lng);
+    var alert2 = new latLon(data2.lat, data2.lng);
+    var alert3 = new latLon(data3.lat, data3.lng);
+
+    var fraction12 = data1.dist / (data1.dist + data2.dist)
+    var fraction23 = data2.dist / (data2.dist + data3.dist)
+
+    var p0 = alert1.intermediatePointTo(alert2, fraction12)
+    var p2 = alert2.intermediatePointTo(alert3, fraction23)
+    var slope12 = -1 / ((data1.lng - data2.lng) / (data1.lat - data2.lat))
+    var slope23 = -1 / ((data2.lng - data3.lng) / (data2.lat - data3.lat))
+    var b12 = p0.lon - (slope12 * p0.lat)
+    var b23 = p2.lon - (slope23 * p2.lat)
+
+    var p1 = {
+          lat: p0.lat + 1,
+          lon: (p0.lat + 1) * slope12 + b12
+        },
+        p3 = {
+          lat: p2.lat + 1,
+          lon: (p2.lat + 1) * slope23 + b23
+        };
+    var latlng = this.lineIntersect(p0, p1, p2, p3);
+    console.log(p1)
+    return latlng
+  }
+  
+
   render() {
+    times += 1;
+    console.log(times)
+    console.log(this.state.epicLatLng.lat)
     return (
       <MapView
         style={{ flex: 1 }}
         zoomEnabled={true}
         initialRegion={{
-        latitude: 19.203316,
-        longitude: -101.265469,
-        latitudeDelta: 10,
-        longitudeDelta: 10,
+          latitude: 19.203316,
+          longitude: -101.265469,
+          latitudeDelta: 10,
+          longitudeDelta: 10,
         }}
       >
       <MapView.Marker
@@ -114,6 +148,17 @@ export default class App extends React.Component {
         image={markerMe}
         title={'MyPosition'}
         />
+      <MapView.Circle
+        center={{
+            latitude: this.state.epicLatLng.latitude,
+            longitude: this.state.epicLatLng.longitude,
+        }}
+        radius = {20000}
+        title={'Earthquake'}
+        fillColor={'rgba(255,0,0,0.3)'}
+        strokeColor={'rgba(255,0,0,0.3)'}
+        />
+     
    { this.state.markerList.map(function(x, i) {
       return (
         <MapView.Circle
