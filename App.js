@@ -2,12 +2,10 @@ import React from 'react';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
 import MapView from 'react-native-maps';
 import * as firebase from 'firebase';
-import markerGreen from "./img/marker_g.png";
-import markerRed from "./img/marker_r.png";
-import markerOrange from "./img/marker_o.png";
 import markerMe from "./img/marker_mypos.png";
 var latLon = require('geodesy').LatLonVectors;
 import toVector from "./latlon-vectors";
+import MarkerMaker from "./components/marker"
 
 var times = 0;
 
@@ -46,7 +44,6 @@ export default class App extends React.Component {
 		firebase.initializeApp(config);
   }
   
-
   initMarkers = async () => {
     var database = await firebase.database();
     if (database)
@@ -120,16 +117,20 @@ export default class App extends React.Component {
     times += 1;
     console.log(times)
     return (
-      <MapView
-        style={{ flex: 1 }}
-        zoomEnabled={true}
-        initialRegion={{
-          latitude: this.state.currPos.latitude,
-          longitude: this.state.currPos.longitude,
-          latitudeDelta: 10,
-          longitudeDelta: 10,
-        }}
-      >
+      <View style={{flex: 1}}>
+        <MarkerMaker 
+          markerList={this.state.markerList}
+        />
+        <MapView
+          style={{ flex: 1 }}
+          zoomEnabled={true}
+          initialRegion={{
+            latitude: this.state.currPos.latitude,
+            longitude: this.state.currPos.longitude,
+            latitudeDelta: 10,
+            longitudeDelta: 10,
+          }}
+        >
         <MapView.Marker
           coordinate={this.state.currPos}
           image={markerMe}
@@ -148,8 +149,8 @@ export default class App extends React.Component {
         <MapView.Circle
           key = {i}
           center={{
-              latitude: x.lat,
-              longitude: x.lng,
+            latitude: x.lat,
+            longitude: x.lng,
           }}
           radius = {x.dist * 100}
           strokeWidth={2}
@@ -158,7 +159,8 @@ export default class App extends React.Component {
         />
       );
       })}
-    { this.state.markerList.map(function(x, i) {
+      
+    {/* { this.state.markerList.map(function(x, i) {
       if (!x.mag)
         x.color = markerGreen;
       else if (x.mag > 0 && x.mag <= 3)
@@ -189,8 +191,9 @@ export default class App extends React.Component {
           />
         </MapView.Marker>
       );
-      })}
+      })} */}
     </MapView>
+    </View>
     );
   }
 }
