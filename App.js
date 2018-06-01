@@ -5,7 +5,7 @@ import * as firebase from 'firebase';
 import markerMe from "./img/marker_mypos.png";
 var latLon = require('geodesy').LatLonVectors;
 import toVector from "./latlon-vectors";
-import MarkerMaker from "./components/marker"
+import { MarkerMaker } from "./components/marker"
 
 var times = 0;
 
@@ -25,6 +25,7 @@ export default class App extends React.Component {
         longitude: -101.265469,
       }
     }
+    this.initMarkers =  this.initMarkers.bind(this);
   }
 
   componentWillMount = async () => {
@@ -118,9 +119,7 @@ export default class App extends React.Component {
     console.log(times)
     return (
       <View style={{flex: 1}}>
-        <MarkerMaker 
-          markerList={this.state.markerList}
-        />
+        
         <MapView
           style={{ flex: 1 }}
           zoomEnabled={true}
@@ -159,39 +158,9 @@ export default class App extends React.Component {
         />
       );
       })}
-      
-    {/* { this.state.markerList.map(function(x, i) {
-      if (!x.mag)
-        x.color = markerGreen;
-      else if (x.mag > 0 && x.mag <= 3)
-        x.color = markerOrange;
-      else
-        x.color = markerRed;
-      return (
-        <MapView.Marker
-          coordinate={{
-            latitude: x.lat,
-            longitude: x.lng,
-          }}
-          key={i}
-          image={x.color}
-          title={x.key}
-        >
-          <View style={styles.sensorMarker}>
-            <Text style={styles.text}>{x.mag? x.mag : undefined}</Text>
-          </View>
-          <MapView.Circle
-            center={{
-              latitude: x.lat,
-              longitude: x.lng,
-            }}
-            radius = {x.dist * 10}
-            fillColor={'#0f0'}
-            strokeColor={'#000'}
-          />
-        </MapView.Marker>
-      );
-      })} */}
+      <MarkerMaker 
+          markers={this.state.markerList}
+        />
     </MapView>
     </View>
     );

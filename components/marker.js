@@ -5,27 +5,22 @@ import markerGreen from "../img/marker_g.png";
 import markerRed from "../img/marker_r.png";
 import markerOrange from "../img/marker_o.png";
 
-export default class MarkerMaker extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {}
-    }
-    //todo pass state to props
+export class MarkerMaker extends React.Component {
     render () {
-        console.log(this.props.markerList)
-            this.props.markerList.map(function(x, i) {
+        console.log(this.props.markers)
+        return (
+            this.props.markers.map(function(x, i) {
             if (!x.mag)
                 x.color = markerGreen;
             else if (x.mag > 0 && x.mag <= 3)
                 x.color = markerOrange;
             else
                 x.color = markerRed;
-            })
-        return (
+            return (
             <MapView.Marker
                 coordinate={{
-                latitude: x.lat,
-                longitude: x.lng,
+                    latitude: x.lat,
+                    longitude: x.lng,
                 }}
                 key={i}
                 image={x.color}
@@ -45,7 +40,8 @@ export default class MarkerMaker extends React.Component {
             />
             </MapView.Marker>
         );
-    }
+        })
+    )};
 }
 
 const styles = StyleSheet.create({
