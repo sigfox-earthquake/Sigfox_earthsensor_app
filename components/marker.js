@@ -7,7 +7,6 @@ import markerOrange from "../img/marker_o.png";
 
 export class MarkerMaker extends React.Component {
     render () {
-        console.log(this.props.markers)
         return (
             this.props.markers.map(function(x, i) {
             if (!x.mag)
